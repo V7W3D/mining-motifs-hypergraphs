@@ -1,1 +1,0 @@
-[benchmarks] Running: python3 scripts/benchmark_motifs.py --file /home/ahmed/AAGA/mining-motifs-hyperhraphs/data/email-Eu --dataset email-eu --max-size 4
