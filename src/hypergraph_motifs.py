@@ -188,6 +188,117 @@ def baseline_count(H, k=3):
     return dict(M)
 
 
+def efficient_count_order3(H):
+    """Efficient Algorithm 2 for counting motifs of order 3.
+
+    Steps implemented:
+    1) Count all hyperedges of size 3 directly (each such edge induces a motif on its 3 vertices).
+    2) Remove all size-3 hyperedges from H to form G.
+    3) Enumerate connected 3-vertex induced subgraphs of G's projection using ESU.
+       For each vertex set V* not already counted, build the induced sub-hypergraph
+       from G (i.e., without the original size-3 hyperedges), check hypergraph
+       connectivity, canonicalize and count.
+
+    Returns: dict mapping canonical motif representation -> count
+    """
+    M = defaultdict(int)
+    visited = set()
+
+    # 1) count direct hyperedges of size 3
+    for e in H.edges:
+        if len(e) == 3:
+            Vstar = frozenset(e)
+            candidate = H.induced_subhypergraph(Vstar)
+            # canonicalize and count
+            Cm = canonical_form_hypergraph(candidate)
+            M[Cm] += 1
+            visited.add(Vstar)
+
+    # 2/3) enumerate connected 3-vertex induced subgraphs in projection of the
+    # original hypergraph H (this matches the baseline ESU enumeration) and
+    # skip triples already counted. Build induced candidates from the original
+    # H so trimmed edges from size-3 hyperedges remain.
+    G_proj = H.projection_2_section()
+    for Vstar in esu_enumerate_connected_subgraphs(G_proj, 3):
+        Vf = frozenset(Vstar)
+        if Vf in visited:
+            continue
+        candidate = H.induced_subhypergraph(Vstar)
+        if is_connected_hypergraph(candidate):
+            Cm = canonical_form_hypergraph(candidate)
+            M[Cm] += 1
+            visited.add(Vf)
+
+    return dict(M)
+
+
+def efficient_count_order4(H):
+    """Efficient Algorithm 3 for counting motifs of order 4.
+
+    Implements the steps from Algorithm 3:
+    1) Count all hyperedges of size 4 directly.
+    2) Remove size-4 edges; for each remaining size-3 edge e, look at
+       all adjacent hyperedges ei. If |e ∪ ei| == 4 and that 4-set
+       hasn't been visited, build the induced sub-hypergraph and count it.
+    3) Remove size-3 edges and run ESU on the projection to enumerate
+       connected 4-vertex induced subgraphs; for any 4-set not visited
+       count its canonical motif.
+
+    Returns: dict mapping canonical motif representation -> count
+    """
+    M = defaultdict(int)
+    visited = set()
+
+    # 1) count direct hyperedges of size 4
+    for e in H.edges:
+        if len(e) == 4:
+            Vstar = frozenset(e)
+            candidate = H.induced_subhypergraph(Vstar)
+            Cm = canonical_form_hypergraph(candidate)
+            M[Cm] += 1
+            visited.add(Vstar)
+
+    # 2) remove size-4 edges
+    edges_no4 = [e for e in H.edges if len(e) != 4]
+    H_no4 = Hypergraph(edges_no4)
+
+    # for each size-3 edge, look at adjacent hyperedges in H_no4
+    size3_edges = [e for e in H_no4.edges if len(e) == 3]
+    if size3_edges:
+        for e in size3_edges:
+            for ei in H_no4.edges:
+                if ei is e:
+                    continue
+                if not (ei & e):
+                    continue
+                union = e | ei
+                if len(union) == 4:
+                    Vf = frozenset(union)
+                    if Vf in visited:
+                        continue
+                    # build induced candidate from the original H (to match baseline semantics)
+                    candidate = H.induced_subhypergraph(union)
+                    if is_connected_hypergraph(candidate):
+                        Cm = canonical_form_hypergraph(candidate)
+                        M[Cm] += 1
+                        visited.add(Vf)
+
+    # 3) enumerate connected 4-vertex induced subgraphs in projection of original H
+    # (use original projection to match baseline enumeration), skip visited
+    G_proj = H.projection_2_section()
+    for Vstar in esu_enumerate_connected_subgraphs(G_proj, 4):
+        Vf = frozenset(Vstar)
+        if Vf in visited:
+            continue
+        candidate = H.induced_subhypergraph(Vstar)
+        if is_connected_hypergraph(candidate):
+            Cm = canonical_form_hypergraph(candidate)
+            M[Cm] += 1
+            visited.add(Vf)
+
+    return dict(M)
+
+
 def _example_hypergraph():
     # small toy example with overlapping hyperedges
     edges = [
@@ -203,13 +314,20 @@ def main():
     parser = argparse.ArgumentParser(description="Count k-order hypergraph motifs (k=3,4)")
     parser.add_argument("--k", type=int, default=3, choices=[3,4], help="motif order")
     parser.add_argument("--example", action="store_true", help="run built-in example")
+    parser.add_argument("--efficient", action="store_true", help="run efficient order-3 counting algorithm")
+    parser.add_argument("--efficient4", action="store_true", help="run efficient order-4 counting algorithm")
     args = parser.parse_args()
 
     if args.example:
         H = _example_hypergraph()
         print(f"Hypergraph vertices: {sorted(H.vertices)}")
         print(f"Hypergraph edges: {list(map(sorted, H.edges))}")
-        counts = baseline_count(H, k=args.k)
+        if args.efficient4:
+            counts = efficient_count_order4(H)
+        elif args.efficient:
+            counts = efficient_count_order3(H)
+        else:
+            counts = baseline_count(H, k=args.k)
         print(f"Motif counts for k={args.k} (canonical form -> count):")
         for krep, c in counts.items():
             print(krep, "->", c)
