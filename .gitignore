@@ -1,4 +1,4 @@
-scripts/
+scripts/__pycache__
 data/
 examples/
-scripts/__pycache__/
+src/__pycache__/
