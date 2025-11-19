@@ -1,0 +1,7 @@
+Metadata-Version: 2.4
+Name: mining-motifs-hyperhraphs
+Version: 0.0.1
+Summary: Tools for counting higher-order motifs in hypergraphs
+License: MIT
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
