@@ -42,11 +42,6 @@ echo "[benchmarks] Upgrading pip and installing package in editable mode..."
 python3 -m pip install --upgrade pip setuptools wheel
 python3 -m pip install -e .
 
-if [ -f "requirements.txt" ]; then
-  echo "[benchmarks] Installing requirements.txt (if any)"
-  python3 -m pip install -r "requirements.txt" || true
-fi
-
 if [ "$DATASET" = "all" ]; then
   if [ -n "$FILEPATH" ]; then
     echo "[benchmarks] Warning: --file given but --dataset=all; ignoring --file" >&2

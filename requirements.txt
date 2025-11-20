@@ -1,4 +1,0 @@
-# Runtime requirements for this project
-# Currently there are no external dependencies — only Python standard library.
-# If you add external packages, list them here, one per line, e.g.:
-# numpy>=1.24

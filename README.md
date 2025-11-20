@@ -24,25 +24,6 @@ A conventional layout showing top-level files and important folders:
 
 ## Quick start
 
-Create and activate a virtual environment (recommended):
-
-```
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-Install Python dependencies (install from `requirements.txt` if present):
-
-```
-pip install -r requirements.txt
-```
-
-Or install the package in editable mode to run scripts from the repo:
-
-```
-pip install -e .
-```
-
 Make the runner executable so it can be launched directly from the shell:
 
 ```
