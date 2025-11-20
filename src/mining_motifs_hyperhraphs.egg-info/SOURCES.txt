@@ -1,6 +1,0 @@
-README.md
-pyproject.toml
-src/mining_motifs_hyperhraphs.egg-info/PKG-INFO
-src/mining_motifs_hyperhraphs.egg-info/SOURCES.txt
-src/mining_motifs_hyperhraphs.egg-info/dependency_links.txt
-src/mining_motifs_hyperhraphs.egg-info/top_level.txt
