@@ -44,15 +44,11 @@ class Hypergraph:
 
     def induced_subhypergraph(self, vertex_subset):
         """Return a new Hypergraph induced by vertex_subset (iterable).
-        Only edges with non-empty intersection are kept, but trimmed to
-        the subset (i.e., e' = e intersect V*), and we discard empty edges.
+        Only edges entirely contained in the vertex subset are kept
+        (node-induced subhypergraph).
         """
         Vset = set(vertex_subset)
-        sub_edges = []
-        for e in self.edges:
-            inter = e & Vset
-            if inter:
-                sub_edges.append(inter)
+        sub_edges = [e for e in self.edges if e.issubset(Vset)]
         H = Hypergraph(sub_edges)
         return H
 
